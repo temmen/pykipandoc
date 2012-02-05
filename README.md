@@ -36,11 +36,10 @@ Mdwn perl plugin provides a workarund for a similar problem:
      $content=Encode::encode_utf8($content);
 	eval {$content=&$markdown_sub($content)};
 	if ($@) {
-		eval {$content=&$markdown_sub($content)};
-		print STDERR $@ if $@;
+	   eval {$content=&$markdown_sub($content)};
+	   print STDERR $@ if $@;
 	}
 	$content=Encode::decode_utf8($content);
-
 	return $content;
 
 Looking for something similar is the reason of that strange try: unicode etc... in pykipandoc.
