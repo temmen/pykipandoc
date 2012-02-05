@@ -43,15 +43,10 @@ def pandoc(proxy, *args):
     
     
 
-def getsetup(proxy, *kwargs):
-     return 'plugin', { 'safe' : 1, 'rebuild' : 1 }
-
-
 def debug(s):
     sys.stderr.write(__name__ + ':DEBUG:%s\n' % s)
     sys.stderr.flush()
 
 proxy = IkiWikiProcedureProxy(__name__, debug_fn=None)
-proxy.hook('getsetup', getsetup)
 proxy.hook('htmlize', pandoc, id="mdwn")
 proxy.run()
