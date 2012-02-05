@@ -25,20 +25,26 @@ Big bugs and endless ignorance need Biggest advices: *as with pandoc-iki*, all w
 I.e. click on 'preview' or 'save page' in editpage return nothing: none in preview, nor in the edited wiki page. At least in pandoc-iki.
 
 In pykidoc the result is: 
->pandoc: : hGetContents: invalid argument (Invalid or incomplete multibyte or wide character)
 
-_I think this is *related to UTF-8*, and to some IkiWiki code requesting to editpage in another encoding, as turn out looking at HTTP POST request._
+   pandoc: : hGetContents: invalid argument (Invalid or incomplete multibyte or wide character)
+
+_I think this is **related to UTF-8**, and to some IkiWiki code requesting to editpage in another encoding, as turn out looking at HTTP POST request._
+Maybe [this](http://old.nabble.com/Bug-373203%3A-ikiwiki%3A-utf8-not-handled-in-image-titles-td4848774.html) refers to the same issue? It's (yet) a gettext problem?
 Mdwn perl plugin provides a workarund for a similar problem:
-># Workaround for perl bug (#376329)
->	$content=Encode::encode_utf8($content);
->	eval {$content=&$markdown_sub($content)};
->	if ($@) {
->		eval {$content=&$markdown_sub($content)};
->		print STDERR $@ if $@;
->	}
->	$content=Encode::decode_utf8($content);
->
->	return $content;
+
+     # Workaround for perl bug (#376329)
+     $content=Encode::encode_utf8($content);
+	eval {$content=&$markdown_sub($content)};
+	if ($@) {
+		eval {$content=&$markdown_sub($content)};
+		print STDERR $@ if $@;
+	}
+	$content=Encode::decode_utf8($content);
+
+	return $content;
+
 Looking for something similar is the reason of that strange try: unicode etc... in pykipandoc.
 
 Without this problem resolved, this extension is -- obviously -- useless. Please [help me](mailto:temmenel@gmail.com)!
+
+Thankyou to all.
