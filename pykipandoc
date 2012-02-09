@@ -13,17 +13,37 @@ __author__ = 'Temistocle M. Mineo <temmenel@gmail.com>'
 __copyright__ = 'Copyright © ' + __author__
 __licence__ = 'GPLv2'
 
+LANG = 'it_IT.utf-8'
+
 from proxy import IkiWikiProcedureProxy
 from subprocess import Popen, PIPE, STDOUT
+import os
+import sys
 
-import sys # da spostare dentro debug().
+os.environ['LANG'] = LANG
 
-def _to_dict(args):
-    return dict((k, v) for k, v in zip(*[iter(args)]*2))
+def debug(s):
+    sys.stderr.write(__name__ + ':DEBUG:%s\n' % s)
+    sys.stderr.flush()
 
-def pandoc(proxy, *args):
-    kwargs = _to_dict(args)
-#    sys.stderr.write(kwargs["content"].encode('utf-8'))
+proxy = IkiWikiProcedureProxy(__name__, debug_fn=None)
+
+def __arglist_to_dict(args):
+    if len(args) % 2 != 0:
+        raise ValueError, 'odd number of arguments, cannot convert to dict'
+    return dict([args[i:i+2] for i in xrange(0, len(args), 2)])
+
+def htmlize(proxy, *args):
+    __doc__ = '''
+    Runs on the raw source of a page and turns it into html. The id
+    parameter specifies the filename extension that a file must have to be
+    htmlized using this plugin. This is how you can add support for new and
+    exciting markup languages to ikiwiki.
+    
+    The function is passed named parameters: "page" and "content" and should
+    return the htmlized content.
+'''
+    kwargs = __arglist_to_dict(args)
     pid = Popen(
          ["/usr/bin/pandoc",
           "--smart",
@@ -35,18 +55,33 @@ def pandoc(proxy, *args):
          stdout=PIPE,
          stderr=STDOUT
          )
-    try:
-        cntn = unicode(kwargs["content"], 'utf-8')
-    except TypeError:
-        cntn = kwargs["content"]
-    return pid.communicate(input=cntn.encode('utf-8'))[0] # BUG? http://old.nabble.com/Bug-373203%3A-ikiwiki%3A-utf8-not-handled-in-image-titles-td4848774.html
-    
-    
+    return pid.communicate(input=kwargs["content"])
+proxy.hook('htmlize', htmlize, id="mdwn")    
 
-def debug(s):
-    sys.stderr.write(__name__ + ':DEBUG:%s\n' % s)
-    sys.stderr.flush()
+def editcontent(proxy, *args):
+    __doc__='''
+    This hook is called when a page is saved (or previewed) using the web
+    interface. It is passed named parameters: content, page, cgi, and
+    session. These are, respectively, the new page content as entered by the
+    user, the page name, a CGI object, and the user's CGI::Session.
+    
+    It can modify the content as desired, and should return the content.
+'''
+    kwargs = __arglist_to_dict(args)
+#    debug("hook `editcontent' called with arguments %s" % kwargs)
+    pid = Popen(
+        ["/usr/bin/pandoc",
+          "--smart",
+          "--number-sections",
+          "--id-prefix",
+          "-t html",
+         ],
+         stdin=PIPE,
+         stdout=PIPE,
+         stderr=STDOUT
+         )
+    return pid.communicate(input=kwargs['content'])
+proxy.hook('editcontent', editcontent)
 
-proxy = IkiWikiProcedureProxy(__name__, debug_fn=None)
-proxy.hook('htmlize', pandoc, id="mdwn")
+# @TzuEND -- 2012, temmen.
 proxy.run()
