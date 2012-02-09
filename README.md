@@ -6,13 +6,13 @@ Questi file markdown diventano ponte per convertire tra vari formati (Latex, HTM
 ## Features from the standard IkiWiki set:
 
 * Implemented
-  htmlize
-  editcontent
+	1. htmlize
+	2. editcontent
 
 * To do
-  ...
+	* ...
 
 * Won't do
-  ...
+	*  ...
 
 Released under the terms of the GPLv2 ([GNU Public License](http://www.gnu.org/licenses/gpl-2.0.html)) in 2012 by Temistocle M. M. <temmenel@gmail.com>.
